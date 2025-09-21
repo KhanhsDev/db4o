@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Launch Program",
+      "request": "launch",
+      "mainClass": "CustomerUI",
+      "classPaths": [
+        "${workspaceFolder}/libs/db4o-8.0.241.159.jar",  // Đường dẫn tới db4o
+        "${workspaceFolder}/bin"  // Đảm bảo rằng bin chứa các class đã biên dịch
+      ]
+    }
+  ]
+}
