@@ -3,6 +3,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 public class SpecialistUI extends JFrame {
     private JTextField tfSpecialistId, tfFullName, tfGender, tfJobTitle, tfExperienceYears;
@@ -115,13 +117,27 @@ public class SpecialistUI extends JFrame {
                 viewSpecialist();
             }
         });
+
+        // Add ListSelectionListener to handle row selection
+        specialistList.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting()) { // Check if the selection is done
+                    String selectedValue = specialistList.getSelectedValue();
+                    if (selectedValue != null) {
+                        // Extract specialistId from selected value (assuming the format "Mã Chuyên Gia: <specialistId>")
+                        String specialistId = selectedValue.split(" - ")[0].split(": ")[1];
+                        fillSpecialistDetails(specialistId);
+                    }
+                }
+            }
+        });
     }
 
     // Method to load specialist list
     private void loadSpecialistList() {
         // Load all specialists into the list
         listModel.clear();
-        System.out.println("Loading specialists...");
         List<Specialist> specialists = specialistManager.getAllSpecialists();
         for (Specialist specialist : specialists) {
             // Display specialist information
@@ -132,6 +148,20 @@ public class SpecialistUI extends JFrame {
                 specialist.getExperienceYears()
             );
             listModel.addElement(specialistInfo);  // Add info to the list
+        }
+    }
+
+    // Method to fill specialist details into the form fields
+    private void fillSpecialistDetails(String specialistId) {
+        Specialist specialist = specialistManager.getSpecialistById(specialistId);
+        if (specialist != null) {
+            tfSpecialistId.setText(specialist.getSpecialistId());
+            tfFullName.setText(specialist.getFullName());
+            tfGender.setText(specialist.getGender());
+            tfJobTitle.setText(specialist.getJobTitle());
+            tfExperienceYears.setText(String.valueOf(specialist.getExperienceYears()));
+        } else {
+            taSpecialistInfo.setText("Chuyên gia không tồn tại!");
         }
     }
 

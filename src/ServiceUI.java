@@ -3,6 +3,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 public class ServiceUI extends JFrame {
     private JTextField tfServiceId, tfServiceName, tfPrice, tfDescription;
@@ -18,10 +20,10 @@ public class ServiceUI extends JFrame {
 
         // JFrame configuration
         setTitle("Quản lý Dịch Vụ - Spa");
-        setSize(500, 500);
+        setSize(900, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
-
+        
         // Panel for service list at the top
         JPanel listPanel = new JPanel();
         listPanel.setLayout(new BorderLayout());
@@ -111,13 +113,27 @@ public class ServiceUI extends JFrame {
                 viewService();
             }
         });
+
+        // Add ListSelectionListener to handle row selection
+        serviceList.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting()) { // Check if the selection is done
+                    String selectedValue = serviceList.getSelectedValue();
+                    if (selectedValue != null) {
+                        // Extract serviceId from selected value (assuming the format "Mã Dịch Vụ: <serviceId>")
+                        String serviceId = selectedValue.split(" - ")[0].split(": ")[1];
+                        fillServiceDetails(serviceId);
+                    }
+                }
+            }
+        });
     }
 
     // Method to load service list
     private void loadServiceList() {
         // Load all services into the list
         listModel.clear();
-        System.out.println("Loading services...");
         List<Service> services = serviceManager.getAllServices();
         for (Service service : services) {
             // Display service information
@@ -128,6 +144,19 @@ public class ServiceUI extends JFrame {
                 service.getPrice()
             );
             listModel.addElement(serviceInfo);  // Add info to the list
+        }
+    }
+
+    // Method to fill service details into the form fields
+    private void fillServiceDetails(String serviceId) {
+        Service service = serviceManager.getServiceById(serviceId);
+        if (service != null) {
+            tfServiceId.setText(service.getServiceId());
+            tfServiceName.setText(service.getServiceName());
+            tfPrice.setText(String.valueOf(service.getPrice()));
+            tfDescription.setText(service.getDescription());
+        } else {
+            taServiceInfo.setText("Dịch vụ không tồn tại!");
         }
     }
 

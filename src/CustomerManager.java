@@ -119,4 +119,31 @@ public class CustomerManager {
         }
         return customers;
     }
+    public Customer getCustomerByName(String customerName) {
+        Customer customer = null;
+        try {
+            Connection conn = DatabaseManager.getConnection();
+            String sql = "SELECT * FROM customers WHERE fullName = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, customerName);
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                customer = new Customer(
+                    rs.getString("customerId"),
+                    rs.getString("fullName"),
+                    rs.getString("phoneNumber"),
+                    rs.getString("birthDate"),
+                    rs.getString("gender"),
+                    rs.getInt("points"),
+                    rs.getString("membershipLevel")
+                );
+            }
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            System.out.println("Error retrieving customer: " + e.getMessage());
+        }
+        return customer;
+    }
 }

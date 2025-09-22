@@ -3,6 +3,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 public class PromotionPackageUI extends JFrame {
     private JTextField tfPackageId, tfPackageName, tfDescription, tfDiscountedPrice;
@@ -18,7 +20,7 @@ public class PromotionPackageUI extends JFrame {
 
         // JFrame configuration
         setTitle("Quản lý Gói Khuyến Mãi - Spa");
-        setSize(500, 500);
+        setSize(900, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
@@ -111,13 +113,27 @@ public class PromotionPackageUI extends JFrame {
                 viewPromotionPackage();
             }
         });
+
+        // Add ListSelectionListener to handle row selection
+        promotionPackageList.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting()) { // Check if the selection is done
+                    String selectedValue = promotionPackageList.getSelectedValue();
+                    if (selectedValue != null) {
+                        // Extract packageId from selected value (assuming the format "Mã Gói: <packageId>")
+                        String packageId = selectedValue.split(" - ")[0].split(": ")[1];
+                        fillPromotionPackageDetails(packageId);
+                    }
+                }
+            }
+        });
     }
 
     // Method to load promotion package list
     private void loadPromotionPackageList() {
         // Load all promotion packages into the list
         listModel.clear();
-        System.out.println("Loading promotion packages...");
         List<PromotionPackage> promotionPackages = promotionPackageManager.getAllPromotionPackages();
         for (PromotionPackage promotionPackage : promotionPackages) {
             // Display promotion package information
@@ -131,9 +147,26 @@ public class PromotionPackageUI extends JFrame {
         }
     }
 
+    // Method to fill promotion package details into the form fields
+    private void fillPromotionPackageDetails(String packageId) {
+        PromotionPackage promotionPackage = promotionPackageManager.getPromotionPackageById(packageId);
+        if (promotionPackage != null) {
+            tfPackageId.setText(promotionPackage.getPackageId());
+            tfPackageName.setText(promotionPackage.getPackageName());
+            tfDescription.setText(promotionPackage.getDescription());
+            tfDiscountedPrice.setText(String.valueOf(promotionPackage.getDiscount()));
+        } else {
+            taPackageInfo.setText("Gói khuyến mãi không tồn tại!");
+        }
+    }
+
     // Add promotion package
     private void addPromotionPackage() {
         String packageId = tfPackageId.getText();
+        if (promotionPackageManager.getPromotionPackageById(packageId) != null) {
+            taPackageInfo.setText("Mã gói đã tồn tại. Vui lòng nhập mã gói khác!");
+            return;  // Dừng lại nếu ID đã tồn tại
+        }
         String packageName = tfPackageName.getText();
         String description = tfDescription.getText();
         double discountedPrice = Double.parseDouble(tfDiscountedPrice.getText());

@@ -8,7 +8,7 @@ public class DatabaseManager {
     // Phương thức để khởi tạo kết nối cơ sở dữ liệu
     public static void init() {
         try (Connection conn = getConnection()) {
-            System.out.println("Kết nối cơ sở dữ liệu thành công!");
+            System.out.println("kết nối thành công!");
         } catch (SQLException e) {
             System.out.println("Lỗi kết nối: " + e.getMessage());
         }

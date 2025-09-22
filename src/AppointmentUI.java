@@ -5,6 +5,8 @@ import java.awt.event.ActionListener;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 public class AppointmentUI extends JFrame {
     private JTextField tfAppointmentId, tfDateTime, tfStatus, tfCustomerNote;
@@ -20,7 +22,7 @@ public class AppointmentUI extends JFrame {
 
         // JFrame configuration
         setTitle("Quản lý Cuộc Hẹn - Spa");
-        setSize(500, 400);
+        setSize(900, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
@@ -114,13 +116,27 @@ public class AppointmentUI extends JFrame {
                 viewAppointment();
             }
         });
+
+        // Add ListSelectionListener to handle row selection
+        appointmentList.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting()) { // Check if the selection is done
+                    String selectedValue = appointmentList.getSelectedValue();
+                    if (selectedValue != null) {
+                        // Extract appointmentId from selected value (assuming the format "Mã Cuộc Hẹn: <appointmentId>")
+                        String appointmentId = selectedValue.split(" - ")[0].split(": ")[1];
+                        fillAppointmentDetails(appointmentId);
+                    }
+                }
+            }
+        });
     }
 
     // Method to load appointment list
     private void loadAppointmentList() {
         // Load all appointments into the list
         listModel.clear();
-        System.out.println("Loading appointments...");
         List<Appointment> appointments = appointmentManager.getAllAppointments();
         for (Appointment appointment : appointments) {
             // Display appointment information
@@ -132,6 +148,19 @@ public class AppointmentUI extends JFrame {
                 appointment.getCustomerNote()
             );
             listModel.addElement(appointmentInfo); // Add info to the list
+        }
+    }
+
+    // Method to fill appointment details into the form fields
+    private void fillAppointmentDetails(String appointmentId) {
+        Appointment appointment = appointmentManager.getAppointmentById(appointmentId);
+        if (appointment != null) {
+            tfAppointmentId.setText(appointment.getAppointmentId());
+            tfDateTime.setText(appointment.getDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            tfStatus.setText(appointment.getStatus());
+            tfCustomerNote.setText(appointment.getCustomerNote());
+        } else {
+            taAppointmentInfo.setText("Cuộc hẹn không tồn tại!");
         }
     }
 

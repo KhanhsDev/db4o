@@ -20,6 +20,7 @@ public class Customer {
 
     // Getters and Setters
     public String getCustomerId() { return customerId; }
+    public String getCustomerName() { return fullName; }
     public String getFullName() { return fullName; }
     public String getPhoneNumber() { return phoneNumber; }
     public String getBirthDate() { return birthDate; }
@@ -35,3 +36,5 @@ public class Customer {
     public void setPoints(int points) { this.points = points; }
     public void setMembershipLevel(String membershipLevel) { this.membershipLevel = membershipLevel; }
 }
+
+// file này là nơi khai báo các thuộc tính ( attribute ) và phuoqng thức ( method ) của đối tượng Khách Hàng ( Customer )

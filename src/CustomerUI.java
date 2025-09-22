@@ -2,6 +2,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.util.List;
 
 public class CustomerUI extends JFrame {
@@ -18,7 +20,7 @@ public class CustomerUI extends JFrame {
 
         // JFrame configuration
         setTitle("Quản lý Khách Hàng - Spa");
-        setSize(500, 400);
+        setSize(900, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
@@ -121,7 +123,23 @@ public class CustomerUI extends JFrame {
         btnView.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                viewCustomer();
+                // viewCustomer();
+                viewCustomerByName();
+            }
+        });
+
+        // Add ListSelectionListener to handle row selection
+        customerList.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting()) { // Check if the selection is done
+                    String selectedValue = customerList.getSelectedValue();
+                    if (selectedValue != null) {
+                        // Extract customerId from selected value (assuming the format "Mã KH: <customerId>")
+                        String customerId = selectedValue.split(" - ")[0].split(": ")[1];
+                        fillCustomerDetails(customerId);
+                    }
+                }
             }
         });
     }
@@ -130,7 +148,6 @@ public class CustomerUI extends JFrame {
     private void loadCustomerList() {
         // Load all customers into the list
         listModel.clear();
-        System.out.println("Loading customers...");
         List<Customer> customers = customerManager.getAllCustomers();
         for (Customer customer : customers) {
             // Display customer information
@@ -148,9 +165,31 @@ public class CustomerUI extends JFrame {
         }
     }
 
+    // Method to fill customer details into the form fields
+    private void fillCustomerDetails(String customerId) {
+        Customer customer = customerManager.getCustomerById(customerId);
+        if (customer != null) {
+            tfCustomerId.setText(customer.getCustomerId());
+            tfFullName.setText(customer.getFullName());
+            tfPhoneNumber.setText(customer.getPhoneNumber());
+            tfBirthDate.setText(customer.getBirthDate());
+            tfGender.setText(customer.getGender());
+            tfPoints.setText(String.valueOf(customer.getPoints()));
+            tfMembershipLevel.setText(customer.getMembershipLevel());
+        } else {
+            taCustomerInfo.setText("Khách hàng không tồn tại!");
+        }
+    }
+
     // Add customer
     private void addCustomer() {
         String customerId = tfCustomerId.getText();
+    
+    // Kiểm tra xem ID khách hàng đã tồn tại chưa
+    if (customerManager.getCustomerById(customerId) != null) {
+        taCustomerInfo.setText("Mã khách hàng đã tồn tại. Vui lòng nhập mã khách hàng khác!");
+        return;  // Dừng lại nếu ID đã tồn tại
+    }
         String fullName = tfFullName.getText();
         String phoneNumber = tfPhoneNumber.getText();
         String birthDate = tfBirthDate.getText();
@@ -192,6 +231,22 @@ public class CustomerUI extends JFrame {
     private void viewCustomer() {
         String customerId = tfCustomerId.getText();
         Customer customer = customerManager.getCustomerById(customerId);
+        if (customer != null) {
+            taCustomerInfo.setText("Thông tin khách hàng:\n" +
+                    "Mã khách hàng: " + customer.getCustomerId() + "\n" +
+                    "Họ tên: " + customer.getFullName() + "\n" +
+                    "Số điện thoại: " + customer.getPhoneNumber() + "\n" +
+                    "Ngày sinh: " + customer.getBirthDate() + "\n" +
+                    "Giới tính: " + customer.getGender() + "\n" +
+                    "Tổng điểm: " + customer.getPoints() + "\n" +
+                    "Hạng thành viên: " + customer.getMembershipLevel());
+        } else {
+            taCustomerInfo.setText("Khách hàng không tồn tại!");
+        }
+    }
+    private void viewCustomerByName() {
+        String customerName = tfFullName.getText();
+        Customer customer = customerManager.getCustomerByName(customerName);
         if (customer != null) {
             taCustomerInfo.setText("Thông tin khách hàng:\n" +
                     "Mã khách hàng: " + customer.getCustomerId() + "\n" +
